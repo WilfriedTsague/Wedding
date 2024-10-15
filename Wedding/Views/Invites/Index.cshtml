@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Wedding.Models.Invite>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NomInvite)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PrenomInvite)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdInviteur)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdTable)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TypeBillets)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NomInvite)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PrenomInvite)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdInviteur)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdTable)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypeBillets)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
+                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
