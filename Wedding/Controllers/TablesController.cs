@@ -95,10 +95,6 @@ namespace Wedding.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("NomTable", "NbrePlaces", "Statut", "StatutDuJour")] Table table)
         {
-          if(id != table.Id)
-            {
-                return NotFound();
-            }
 
           if(ModelState.IsValid)
             {
