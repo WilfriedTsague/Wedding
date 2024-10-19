@@ -1,30 +1,48 @@
 ﻿@model IEnumerable<Wedding.Models.Table>
-
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Index</h1>
 
+<form asp-action="Index">
+    <div class="form-group">
+        <label for="searchNomTable">Nom de la Table</label>
+        <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
+    </div>
+    <div class="form-group">
+        <label for="searchStatut">Statut</label>
+        <select name="searchStatut" class="form-control">
+            <option value="">Tous</option>
+            <option value="Vide">Vide</option>
+            <option value="En_cours">En cours</option>
+            <option value="Pleine">Pleine</option>
+        </select>
+    </div>
+    <input type="submit" value="Search" class="btn btn-primary" />
+</form>
+
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
-           
             <th>
-                @Html.DisplayNameFor(model => model.NomTable)
+                @Html.ActionLink("Nom de la Table (Places Total/Places Dispo)", "Index", new { sortOrder = ViewBag.NomTableSortParm }) <span class="@(ViewBag.NomTableSortParm == "nomtable_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.NbrePlaces)
+                @Html.ActionLink("Nombre de Places", "Index", new { sortOrder = ViewBag.NbrePlacesSortParm }) <span class="@(ViewBag.NbrePlacesSortParm == "nbreplace_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Statut)
+                @Html.ActionLink("Places Occupé", "Index", new { sortOrder = ViewBag.NombreInvitesSortParm }) <span class="@(ViewBag.NombreInvitesSortParm == "nombreinvites_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
             </th>
-            
             <th>
-                @Html.DisplayNameFor(model => model.StatutDuJour)
+                @Html.ActionLink("Statut", "Index", new { sortOrder = ViewBag.StatutSortParm }) <span class="@(ViewBag.StatutSortParm == "statut_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+            </th>
+            <th>
+                @Html.ActionLink("Statut du Jour", "Index", new { sortOrder = ViewBag.StatutDuJourSortParm }) <span class="@(ViewBag.StatutDuJourSortParm == "statutdujour_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
             </th>
             <th></th>
         </tr>
@@ -33,13 +51,18 @@
         @foreach (var table in Model)
         {
             <tr>
-                <td>@table.NomTable</td>
+                <td>@table.NomTable (@table.NbrePlaces / @(table.NbrePlaces - (table.NombreInvites ?? 0)))</td>
                 <td>@table.NbrePlaces</td>
+                <td>@(table.NombreInvites ?? 0)</td>
                 <td>@table.Statut</td>
                 <td>@table.StatutDuJour</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@table.Id">Détails</a> |
                     <a asp-action="Edit" asp-route-id="@table.Id">Modifier</a> |
+                    @if (table.Statut != Statut.Pleine)
+                    {
+                        <a asp-action="Create" asp-controller="Invites" asp-route-id="@table.Id">Ajouter</a>
+                    } |
                     <a asp-action="Delete" asp-route-id="@table.Id">Supprimer</a>
                 </td>
             </tr>

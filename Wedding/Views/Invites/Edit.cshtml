@@ -1,11 +1,9 @@
 ﻿@model Wedding.Models.Invite
-
 @{
     ViewData["Title"] = "Edit";
 }
 
 <h1>Edit</h1>
-
 <h4>Invite</h4>
 <hr />
 <div class="row">
@@ -14,7 +12,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Id" class="control-label"></label>
-                <input asp-for="Id" class="form-control" />
+                <input asp-for="Id" class="form-control" readonly /> <!-- Ajout du readonly pour Id -->
                 <span asp-validation-for="Id" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -28,18 +26,25 @@
                 <span asp-validation-for="PrenomInvite" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="IdInviteur" class="control-label"></label>
-                <input asp-for="IdInviteur" class="form-control" />
-                <span asp-validation-for="IdInviteur" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IdTable" class="control-label"></label>
-                <input asp-for="IdTable" class="form-control" />
+                <label asp-for="IdTable" class="control-label">Table</label>
+                <select asp-for="IdTable" asp-items="ViewBag.IdTable" class="form-control">
+                    <option value="">-- Sélectionnez une table --</option>
+                </select>
                 <span asp-validation-for="IdTable" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="IdInviteur" class="control-label">Invité par</label>
+                <select asp-for="IdInviteur" asp-items="ViewBag.IdInviteur" class="form-control">
+                    <option value="">-- Sélectionnez un invité --</option>
+                </select>
+                <span asp-validation-for="IdInviteur" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="TypeBillets" class="control-label"></label>
-                <input asp-for="TypeBillets" class="form-control" />
+                <select asp-for="TypeBillets" class="form-control">
+                    <option value="Solo">Solo</option>
+                    <option value="Couple">Couple</option>
+                </select>
                 <span asp-validation-for="TypeBillets" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -48,11 +53,12 @@
         </form>
     </div>
 </div>
-
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

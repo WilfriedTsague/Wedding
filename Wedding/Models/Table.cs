@@ -10,8 +10,9 @@ namespace Wedding.Models
         public int NbrePlaces { get; set; }
         public Statut Statut { get; set; }
         public int? NbreInvitePresent { get; set; }
+        public int? NombreInvites { get; set; }
         public Statut StatutDuJour { get; set; }
-        public virtual ICollection<Invite>? invites { get; set; }
+        public virtual ICollection<Invite>? Invites { get; set; }
     }
 
     //statut pour l'enregistrement des invité sur les billets

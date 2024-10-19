@@ -1,0 +1,26 @@
+﻿@model Wedding.Models.Invite
+
+<h2>Détails de l'invité</h2>
+
+<div>
+    <h3>@Model.NomInvite @Model.PrenomInvite</h3>
+
+    <dl class="row">
+        <dt class="col-sm-2">Nom</dt>
+        <dd class="col-sm-10">@Model.NomInvite</dd>
+
+        <dt class="col-sm-2">Prénom</dt>
+        <dd class="col-sm-10">@Model.PrenomInvite</dd>
+
+        <dt class="col-sm-2">Nom de la Table</dt>
+        <dd class="col-sm-10">@Model.Table?.NomTable</dd>
+
+        <dt class="col-sm-2">Type de Billets</dt>
+        <dd class="col-sm-10">@Model.TypeBillets</dd>
+
+        <!-- Ajouter d'autres champs si nécessaire -->
+    </dl>
+
+    <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary">Modifier</a>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Retour à la liste</a>
+</div>

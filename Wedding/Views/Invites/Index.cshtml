@@ -1,65 +1,188 @@
 ﻿@model IEnumerable<Wedding.Models.Invite>
-
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<div class="container mt-5">
+    <h1>Index</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NomInvite)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrenomInvite)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdInviteur)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IdTable)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TypeBillets)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NomInvite)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PrenomInvite)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdInviteur)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IdTable)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TypeBillets)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <form asp-action="Index" class="mb-4">
+        <span class="fa fa-check"></span>
+        <div class="form-group">
+            <label for="searchNomInvite">Nom Invite</label>
+            <input type="text" name="searchNomInvite" class="form-control" value="@ViewData["searchNomInvite"]" />
+        </div>
+        <div class="form-group">
+            <label for="searchPrenomInvite">Prenom Invite</label>
+            <input type="text" name="searchPrenomInvite" class="form-control" value="@ViewData["searchPrenomInvite"]" />
+        </div>
+        <div class="form-group">
+            <label for="searchNomTable">Nom de Table</label>
+            <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
+        </div>
+        <input type="submit" value="Search" class="btn btn-primary" />
+    </form>
+
+    <p>
+        <a asp-action="Create" class="btn btn-success">Create New</a>
+    </p>
+
+    <!-- Ajout des boutons pour scanner ou téléverser un QR code -->
+    <div class="mb-3">
+        <button class="btn btn-success" onclick="startCamera()">Scanner QR Code</button>
+        <button class="btn btn-info" onclick="document.getElementById('uploadQRCode').click();">Téléverser QR Code</button>
+        <input type="file" id="uploadQRCode" style="display:none;" accept="image/*" onchange="uploadQRCode(this.files[0])">
+    </div>
+
+    <!-- Zone de résultat du scan -->
+    <p id="qrResult">Résultat du QR Code : <span id="qrCodeResult"></span></p>
+
+    <!-- Table des données -->
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                    @Html.ActionLink("ID", "Index", new { sortOrder = ViewBag.IdSortParm })
+                    <span class="@(ViewBag.IdSortParm == "id_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Nom Invite", "Index", new { sortOrder = ViewBag.NomInviteSortParm })
+                    <span class="@(ViewBag.NomInviteSortParm == "nominvite_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Prenom Invite", "Index", new { sortOrder = ViewBag.PrenomInviteSortParm })
+                    <span class="@(ViewBag.PrenomInviteSortParm == "prenominvite_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Invités de", "Index", new { sortOrder = ViewBag.InviteurPrenomSortParm })
+                    <span class="@(ViewBag.InviteurPrenomSortParm == "inviteurprenom_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Nom de Table (Places Total/Places Dispo)", "Index", new { sortOrder = ViewBag.NomTableSortParm })
+                    <span class="@(ViewBag.NomTableSortParm == "nomtable_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Type Billets", "Index", new { sortOrder = ViewBag.TypeBilletsSortParm })
+                    <span class="@(ViewBag.TypeBilletsSortParm == "typebillets_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NomInvite)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PrenomInvite)
+                    </td>
+                    <td>
+                        @(item.Inviteur?.PrenomInvite ?? "")
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Table.NomTable)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TypeBillets)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Editer">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Détails">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Supprimer">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                        <a asp-action="GenerateQRCode" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Générer QR Code">
+                            <i class="fas fa-qrcode"></i>
+                        </a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- JavaScript pour scanner et téléverser un QR code -->
+    <script>
+        function startCamera() {
+            const html5QrCode = new Html5Qrcode("qrReader");
+
+            // Démarre le scanner de QR code avec la caméra
+            html5QrCode.start(
+                { facingMode: "environment" }, // Utilise la caméra arrière
+                {
+                    fps: 10,    // Fréquence d'images
+                    qrbox: 250  // Taille de la zone de scan
+                },
+                (decodedText, decodedResult) => {
+                    // Appelé lorsque le code QR est décodé
+                    document.getElementById("qrCodeResult").innerText = decodedText;
+                    // Stoppe le scanner après avoir décodé
+                    html5QrCode.stop().then(() => {
+                        console.log("Scanner arrêté.");
+                    }).catch((err) => {
+                        console.error("Erreur lors de l'arrêt du scanner : ", err);
+                    });
+                    // Effectuer une action après le décodage, par exemple, rediriger
+                    redirectToInvite(decodedText);
+                },
+                (errorMessage) => {
+                    // Gère les erreurs
+                    console.warn("QR code non reconnu : ", errorMessage);
+                }
+            ).catch((err) => {
+                console.error("Erreur lors de la démarrage du scanner : ", err);
+            });
+        }
+
+        function redirectToInvite(decodedText) {
+            // Logique pour rediriger l'utilisateur vers les détails de l'invité
+            // Par exemple, si le code contient un ID d'invité
+            window.location.href = `/Invites/Details/${decodedText}`;
+        }
+        function uploadQRCode(file) {
+            if (!file) {
+                alert("Aucun fichier sélectionné !");
+                return;
+            }
+
+            // Vérifier le type de fichier (optionnel)
+            if (!file.type.startsWith('image/')) {
+                alert("Veuillez téléverser une image !");
+                return;
+            }
+
+            // Préparer le formulaire de données
+            let formData = new FormData();
+            formData.append('qrCodeImage', file);
+
+            // Envoyer l'image au serveur via AJAX
+            fetch('/Invites/ReadQRCode', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())  // On attend une réponse JSON
+                .then(result => {
+                    if (result.success) {
+                        // Si le serveur renvoie "success: true", on redirige vers la page des détails
+                        window.location.href = '/Invites/Details/' + result.inviteId;
+                    } else {
+                        // Si le serveur renvoie "success: false", on affiche un message d'erreur
+                        alert("Erreur: " + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du traitement du QR code.');
+                });
+        }
+    </script>
+</div>

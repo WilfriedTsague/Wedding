@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wedding.ContexteDB;
@@ -11,49 +12,53 @@ using Wedding.ContexteDB;
 namespace Wedding.Migrations
 {
     [DbContext(typeof(WeddingContext))]
-    [Migration("20241014225737_modelone")]
-    partial class modelone
+    [Migration("20241019000535_initalcreate")]
+    partial class initalcreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Wedding.Models.Invite", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
-                    b.Property<int>("IdInviteur")
-                        .HasColumnType("INTEGER");
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("IdTable")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("IdInviteur")
+                        .HasColumnType("int");
 
-                    b.Property<int?>("InviteurId")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("IdTable")
+                        .HasColumnType("int");
 
                     b.Property<string>("NomInvite")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PrenomInvite")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
-                    b.Property<int>("TableId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("QRCodeId")
+                        .HasColumnType("longtext");
 
-                    b.Property<int>("TypeBillets")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("TypeBillets")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InviteurId");
+                    b.HasIndex("IdInviteur");
 
-                    b.HasIndex("TableId");
+                    b.HasIndex("IdTable");
 
                     b.ToTable("Invite");
                 });
@@ -62,56 +67,44 @@ namespace Wedding.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("NbreInvitePresent")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("NbrePlaces")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("NomTable")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("NombreInvites")
+                        .HasColumnType("int");
 
                     b.Property<int>("Statut")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("StatutDuJour")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.ToTable("Table");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            NbrePlaces = 10,
-                            NomTable = "Table 1",
-                            Statut = 0,
-                            StatutDuJour = 0
-                        },
-                        new
-                        {
-                            Id = 2,
-                            NbrePlaces = 8,
-                            NomTable = "Table 2",
-                            Statut = 1,
-                            StatutDuJour = 0
-                        });
                 });
 
             modelBuilder.Entity("Wedding.Models.Invite", b =>
                 {
                     b.HasOne("Wedding.Models.Invite", "Inviteur")
                         .WithMany()
-                        .HasForeignKey("InviteurId");
+                        .HasForeignKey("IdInviteur")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Wedding.Models.Table", "Table")
-                        .WithMany("invites")
-                        .HasForeignKey("TableId")
+                        .WithMany("Invites")
+                        .HasForeignKey("IdTable")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -122,7 +115,7 @@ namespace Wedding.Migrations
 
             modelBuilder.Entity("Wedding.Models.Table", b =>
                 {
-                    b.Navigation("invites");
+                    b.Navigation("Invites");
                 });
 #pragma warning restore 612, 618
         }

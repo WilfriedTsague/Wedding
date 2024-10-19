@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Scanner un QR Code";
+}
+
+<h2>Scanner un QR Code</h2>
+
+<div id="reader" style="width: 500px;"></div>
+<p id="result">Résultat: </p>
+
+<script>
+    function onScanSuccess(decodedText, decodedResult) {
+        // Le QR code a été lu avec succès
+        document.getElementById('result').innerText = `Résultat: ${decodedText}`;
+
+        // Optionnel : redirection ou envoi à un contrôleur pour traitement supplémentaire
+        // window.location.href = `/Invites/ProcessQrCode?data=${decodedText}`;
+    }
+
+    function onScanFailure(error) {
+        // Vous pouvez ignorer les erreurs de scan ici
+        console.warn(`Erreur lors du scan: ${error}`);
+    }
+
+    // Initialisation du lecteur QR
+    let html5QrCode = new Html5Qrcode("reader");
+
+    // Commencez le scan avec la caméra arrière (par défaut) si elle est disponible
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+            let cameraId = cameras[0].id;
+            html5QrCode.start(
+                cameraId,
+                {
+                    fps: 10,    // Nombre d'images par seconde (FPS)
+                    qrbox: 250  // Taille du cadre de scan
+                },
+                onScanSuccess,
+                onScanFailure
+            );
+        }
+    }).catch(err => {
+        // Gérer l'erreur d'accès à la caméra
+        console.error(`Erreur lors de l'accès à la caméra: ${err}`);
+    });
+</script>

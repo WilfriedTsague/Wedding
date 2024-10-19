@@ -1,0 +1,74 @@
+﻿/* styles.css */
+
+/* Couleurs de thème */
+:root {
+    --terracotta: #D16D3D; /* Couleur terracotta */
+    --light-terracotta: #EAB7A0; /* Couleur terracotta clair */
+    --dark-terracotta: #8B3E2E; /* Couleur terracotta foncé */
+}
+
+/* Style général */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9; /* Couleur de fond */
+    color: #333; /* Couleur du texte */
+}
+
+/* En-tête */
+h1 {
+    color: var(--terracotta);
+    text-align: center;
+}
+
+/* Formulaires */
+.form-group label {
+    color: var(--dark-terracotta);
+}
+
+.form-control {
+    border: 1px solid var(--light-terracotta);
+}
+
+.btn-primary {
+    background-color: var(--terracotta);
+    border-color: var(--terracotta);
+}
+
+    .btn-primary:hover {
+        background-color: var(--dark-terracotta);
+        border-color: var(--dark-terracotta);
+    }
+
+/* Table */
+.table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .table th {
+        background-color: var(--terracotta);
+        color: white;
+    }
+
+    .table tr:nth-child(even) {
+        background-color: #f2f2f2; /* Fond clair pour les lignes paires */
+    }
+
+    .table tr:hover {
+        background-color: var(--light-terracotta); /* Couleur de survol */
+    }
+
+/* Autres styles */
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.text-center {
+    text-align: center;
+}

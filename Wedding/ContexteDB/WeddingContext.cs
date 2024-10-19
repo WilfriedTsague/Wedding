@@ -24,7 +24,7 @@ public class WeddingContext :DbContext
 
         modelBuilder.Entity<Invite>()
             .HasOne(i => i.Table)
-            .WithMany(t => t.invites)
+            .WithMany(t => t.Invites)
             .HasForeignKey(i => i.IdTable);
 
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
@@ -33,11 +33,7 @@ public class WeddingContext :DbContext
         }
 
         base.OnModelCreating(modelBuilder);
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Table>().HasData(
-            new Table { Id = 1, NomTable = "Table 1", NbrePlaces = 10, Statut = Statut.Vide, StatutDuJour = Statut.Vide },
-            new Table { Id = 2, NomTable = "Table 2", NbrePlaces = 8, Statut = Statut.En_cours, StatutDuJour = Statut.Vide }
-        );
+       
 
     }
 }

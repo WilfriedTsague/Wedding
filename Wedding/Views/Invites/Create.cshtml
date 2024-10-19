@@ -25,12 +25,17 @@
             </div>
             <div class="form-group">
                 <label asp-for="IdTable" class="control-label">Table</label>
-                <select asp-for="IdTable" asp-items="ViewBag.IdTable" class="form-control"></select>
+                <select asp-for="IdTable" asp-items="ViewBag.IdTable" class="form-control">
+                    <option value="">-- Sélectionnez une table --</option>
+                </select>
                 <span asp-validation-for="IdTable" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="IdInviteur" class="control-label">Invité par</label>
-                <select asp-for="IdInviteur" asp-items="ViewBag.IdInviteur" class="form-control"></select>
+                <select asp-for="IdInviteur" asp-items="ViewBag.IdInviteur" class="form-control">
+                    <option value="">-- Sélectionnez un invité --</option>
+                </select>
+
                 <span asp-validation-for="IdInviteur" class="text-danger"></span>
            </div>
             <div class="form-group">

@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Configuration;
 using Wedding.ContexteDB;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,9 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<WeddingContext>(options =>
-options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnexion")));
+//builder.Services.AddDbContext<WeddingContext>(options => 
+//options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnexion")));
 
+builder.Services.AddDbContext<WeddingContext>(options =>
+           options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+           new MySqlServerVersion(new Version(8, 0, 23))));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
