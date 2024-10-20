@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 //options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnexion")));
 
 builder.Services.AddDbContext<WeddingContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnexion")));
+options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //builder.Services.AddDbContext<WeddingContext>(options =>
 //           options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),

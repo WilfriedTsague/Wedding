@@ -5,67 +5,95 @@
 
 <h1>Index</h1>
 
-<form asp-action="Index">
-    <div class="form-group">
-        <label for="searchNomTable">Nom de la Table</label>
-        <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
+<!-- Formulaire de recherche -->
+<form asp-action="Index" class="mb-4">
+    <div class="row">
+        <div class="col-6 col-md-4 mb-4">
+            <label for="searchNomTable">Nom de la Table</label>
+            <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
+        </div>
+        <div class="col-6 col-md-4 mb-4">
+            <label for="searchStatut">Statut</label>
+            <select name="searchStatut" class="form-control">
+                <option value="">Tous</option>
+                <option value="Vide">Vide</option>
+                <option value="En_cours">En cours</option>
+                <option value="Pleine">Pleine</option>
+            </select>
+        </div>
+        <div class="col-12 col-md-4 mb-4 d-flex align-items-end">
+            <input type="submit" value="Search" class="btn btn-primary w-100" />
+        </div>
     </div>
-    <div class="form-group">
-        <label for="searchStatut">Statut</label>
-        <select name="searchStatut" class="form-control">
-            <option value="">Tous</option>
-            <option value="Vide">Vide</option>
-            <option value="En_cours">En cours</option>
-            <option value="Pleine">Pleine</option>
-        </select>
-    </div>
-    <input type="submit" value="Search" class="btn btn-primary" />
 </form>
 
+<!-- Bouton de création d'une nouvelle table -->
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
 </p>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.ActionLink("Nom de la Table (Places Total/Places Dispo)", "Index", new { sortOrder = ViewBag.NomTableSortParm }) <span class="@(ViewBag.NomTableSortParm == "nomtable_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-            </th>
-            <th>
-                @Html.ActionLink("Nombre de Places", "Index", new { sortOrder = ViewBag.NbrePlacesSortParm }) <span class="@(ViewBag.NbrePlacesSortParm == "nbreplace_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-            </th>
-            <th>
-                @Html.ActionLink("Places Occupé", "Index", new { sortOrder = ViewBag.NombreInvitesSortParm }) <span class="@(ViewBag.NombreInvitesSortParm == "nombreinvites_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-            </th>
-            <th>
-                @Html.ActionLink("Statut", "Index", new { sortOrder = ViewBag.StatutSortParm }) <span class="@(ViewBag.StatutSortParm == "statut_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-            </th>
-            <th>
-                @Html.ActionLink("Statut du Jour", "Index", new { sortOrder = ViewBag.StatutDuJourSortParm }) <span class="@(ViewBag.StatutDuJourSortParm == "statutdujour_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var table in Model)
-        {
+<!-- Table responsive -->
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
             <tr>
-                <td>@table.NomTable (@table.NbrePlaces / @(table.NbrePlaces - (table.NombreInvites ?? 0)))</td>
-                <td>@table.NbrePlaces</td>
-                <td>@(table.NombreInvites ?? 0)</td>
-                <td>@table.Statut</td>
-                <td>@table.StatutDuJour</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@table.Id">Détails</a> |
-                    <a asp-action="Edit" asp-route-id="@table.Id">Modifier</a> |
-                    @if (table.Statut != Statut.Pleine)
-                    {
-                        <a asp-action="Create" asp-controller="Invites" asp-route-id="@table.Id">Ajouter</a>
-                    } |
-                    <a asp-action="Delete" asp-route-id="@table.Id">Supprimer</a>
-                </td>
+                <th>
+                    @Html.ActionLink("Nom de la Table (Places Total/Places Dispo)", "Index", new { sortOrder = ViewBag.NomTableSortParm })
+                    <span class="@(ViewBag.NomTableSortParm == "nomtable_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Nombre de Places", "Index", new { sortOrder = ViewBag.NbrePlacesSortParm })
+                    <span class="@(ViewBag.NbrePlacesSortParm == "nbreplace_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Places Occupées", "Index", new { sortOrder = ViewBag.NombreInvitesSortParm })
+                    <span class="@(ViewBag.NombreInvitesSortParm == "nombreinvites_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Statut", "Index", new { sortOrder = ViewBag.StatutSortParm })
+                    <span class="@(ViewBag.StatutSortParm == "statut_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>
+                    @Html.ActionLink("Statut du Jour", "Index", new { sortOrder = ViewBag.StatutDuJourSortParm })
+                    <span class="@(ViewBag.StatutDuJourSortParm == "statutdujour_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var table in Model)
+            {
+                <tr>
+                    <td>@table.NomTable (@table.NbrePlaces / @(table.NbrePlaces - (table.NombreInvites ?? 0)))</td>
+                    <td>@table.NbrePlaces</td>
+                    <td>@(table.NombreInvites ?? 0)</td>
+                    <td>@table.Statut</td>
+                    <td>@table.StatutDuJour</td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@table.Id" class="btn btn-info btn-sm" title="Détails">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@table.Id" class="btn btn-warning btn-sm" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        @if (table.Statut != Statut.Pleine)
+                        {
+                            <a asp-action="Create" asp-controller="Invites" asp-route-id="@table.Id" class="btn btn-success btn-sm" title="Ajouter Invité">
+                                <i class="fas fa-user-plus"></i>
+                            </a>
+                        }
+                        <a asp-action="Delete" asp-route-id="@table.Id" class="btn btn-danger btn-sm" title="Supprimer">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

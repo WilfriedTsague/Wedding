@@ -370,12 +370,23 @@ namespace Wedding.Controllers
             {
                 using (var ms = new MemoryStream())
                 {
+
+                    if (qrCodeImage == null)
+                    {
+                        return Json(new { success = false, message = "Aucune image de QR code reçue." });
+                    }
+
                     qrCodeImage.CopyTo(ms);
                     var bitmap = new Bitmap(ms);
 
                     // Utilisation de ZXing pour lire le QR code
                     var reader = new BarcodeReader();
                     var result = reader.Decode(bitmap);
+                    if (result == null)
+                    {
+                        return Json(new { success = false, message = "Impossible de lire le QR code." });
+                    }
+
 
                     if (result != null)
                     {
@@ -385,6 +396,12 @@ namespace Wedding.Controllers
                         // Supposons que le QR code contient un texte du genre "IdInvite:123"
                         var parts = decodedText.Split(';');
                         var idPart = parts.FirstOrDefault(p => p.StartsWith("IdInvite:"));
+
+                        if (parts.Length == 0 || !idPart.StartsWith("IdInvite:"))
+                        {
+                            return Json(new { success = false, message = "Le format du QR code est incorrect." });
+                        }
+
                         if (idPart != null)
                         {
                             int inviteId;
@@ -410,7 +427,10 @@ namespace Wedding.Controllers
             }
             catch (Exception ex)
             {
+                // Loguer l'exception
+                Console.WriteLine(ex); // Ou utilisez un logger approprié
                 return Json(new { success = false, message = $"Erreur lors du traitement du QR code : {ex.Message}" });
+
             }
         }
 

@@ -4,57 +4,59 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1 class="text-center">Details</h1>
 
-<div>
-    <h4>Table</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NomTable)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NomTable)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NbrePlaces)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NbrePlaces)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Statut)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Statut)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NbreInvitePresent)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NbreInvitePresent)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreInvites)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreInvites)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StatutDuJour)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StatutDuJour)
-        </dd>
-    </dl>
+<div class="container">
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <tbody>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.Id)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.Id)</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.NomTable)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.NomTable)</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.NbrePlaces)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.NbrePlaces)</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.Statut)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.Statut)</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.NbreInvitePresent)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.NbreInvitePresent)</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.NombreInvites)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.NombreInvites)</td>
+                </tr>
+                <tr>
+                    <th scope="row" class="p-2">@Html.DisplayNameFor(model => model.StatutDuJour)</th>
+                    <td class="p-2">@Html.DisplayFor(model => model.StatutDuJour)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-center my-4">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning mx-2" title="Modifier">
+            <i class="fas fa-edit"></i>
+        </a>
+        <a asp-action="Index" class="btn btn-secondary mx-2" title="Retour à la liste">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
 </div>
-<div>
-    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ }) |
-    <a asp-action="Index">Back to List</a>
+
+<!-- Responsive adjustments directly in the HTML via Bootstrap classes -->
+<div class="d-none d-md-block">
+    <!-- Content for larger screens -->
+</div>
+
+<div class="d-block d-md-none">
+    <!-- Adjusted content for smaller screens -->
 </div>

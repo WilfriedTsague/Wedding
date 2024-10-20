@@ -29,7 +29,10 @@
 
     <!-- Ajout des boutons pour scanner ou téléverser un QR code -->
     <div class="mb-3">
-        <button class="btn btn-success" onclick="startCamera()">Scanner QR Code</button>
+
+        <div id="qrReader"></div>
+
+        <button class="btn btn-success" onclick="scanQRCode()">Scanner QR Code</button>
         <button class="btn btn-info" onclick="document.getElementById('uploadQRCode').click();">Téléverser QR Code</button>
         <input type="file" id="uploadQRCode" style="display:none;" accept="image/*" onchange="uploadQRCode(this.files[0])">
     </div>
@@ -110,44 +113,161 @@
         </tbody>
     </table>
 
+    <style>
+        /* Style pour le conteneur */
+        #qrReader {
+            width: 250px; /* Gardez la taille */
+            height: 250px; /* Gardez la taille */
+            margin: 20px auto; /* Centrer avec une marge */
+            border: 1px solid #ccc; /* Bordure pour le conteneur */
+            overflow: hidden; /* Assurez-vous que le contenu ne dépasse pas */
+        }
+
+    </style>
+
     <!-- JavaScript pour scanner et téléverser un QR code -->
+
     <script>
-        function startCamera() {
+        function scanQRCode() {
             const html5QrCode = new Html5Qrcode("qrReader");
 
-            // Démarre le scanner de QR code avec la caméra
+            html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText, decodedResult) => {
+                    console.log("QR Code décodé : ", decodedText);
+
+                    let formData = new FormData();
+                    formData.append('qrCodeData', decodedText);
+
+                    fetch('/Invites/ReadQRCode', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                window.location.href = '/Invites/Details/' + result.inviteId;
+                            } else {
+                                alert("Erreur: " + result.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors du traitement du QR code.');
+                        })
+                        .finally(() => {
+                            html5QrCode.stop().then(() => {
+                                console.log("Scanner arrêté.");
+                            }).catch(err => {
+                                console.error("Erreur lors de l'arrêt du scanner : ", err);
+                            });
+                        });
+                },
+                (errorMessage) => {
+                    console.warn("QR code non reconnu : ", errorMessage);
+                }
+            ).catch(err => {
+                console.error("Erreur lors du démarrage du scanner : ", err);
+                alert("Erreur : " + err.message);
+            });
+        }
+
+        function uploadQRCode(file) {
+            if (!file) {
+                alert("Aucun fichier sélectionné !");
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert("Veuillez téléverser une image !");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append('qrCodeImage', file);
+
+            fetch('/Invites/ReadQRCode', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        window.location.href = '/Invites/Details/' + result.inviteId;
+                    } else {
+                        alert("Erreur: " + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur lors du traitement du QR code.');
+                });
+        }
+    </script>
+
+   @*  <script>
+        function scanQRCode() {
+            // Initialiser le lecteur de QR code
+            const html5QrCode = new Html5Qrcode("qrReader");
+
+            // Démarrer le scanner de QR code avec la caméra
             html5QrCode.start(
                 { facingMode: "environment" }, // Utilise la caméra arrière
                 {
                     fps: 10,    // Fréquence d'images
-                    qrbox: 250  // Taille de la zone de scan
+                    qrbox: { width: 250, height: 250 } // Utilisez un objet pour définir la taille
+
                 },
                 (decodedText, decodedResult) => {
                     // Appelé lorsque le code QR est décodé
-                    document.getElementById("qrCodeResult").innerText = decodedText;
-                    // Stoppe le scanner après avoir décodé
-                    html5QrCode.stop().then(() => {
-                        console.log("Scanner arrêté.");
-                    }).catch((err) => {
-                        console.error("Erreur lors de l'arrêt du scanner : ", err);
-                    });
-                    // Effectuer une action après le décodage, par exemple, rediriger
-                    redirectToInvite(decodedText);
+                    console.log("QR Code décodé : ", decodedText);
+
+                    // Préparer le formulaire de données
+                    let formData = new FormData();
+                    formData.append('qrCodeData', decodedText); // Ajoute le texte décodé au formulaire
+
+                    // Envoyer le QR code décodé au serveur via AJAX
+                    fetch('/Invites/ReadQRCode', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())  // On attend une réponse JSON
+                        .then(result => {
+                            if (result.success) {
+                                // Si le serveur renvoie "success: true", on redirige vers la page des détails
+                                window.location.href = '/Invites/Details/' + result.inviteId;
+                            } else {
+                                // Si le serveur renvoie "success: false", on affiche un message d'erreur
+                                alert("Erreur: " + result.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            alert('Erreur lors du traitement du QR code.');
+                        })
+                        .finally(() => {
+                            // Arrêter le scanner après avoir traité le QR code
+                            html5QrCode.stop().then(() => {
+                                console.log("Scanner arrêté.");
+                            }).catch(err => {
+                                console.error("Erreur lors de l'arrêt du scanner : ", err);
+                            });
+                        });
                 },
                 (errorMessage) => {
-                    // Gère les erreurs
+                    // Gère les erreurs de décodage
                     console.warn("QR code non reconnu : ", errorMessage);
                 }
-            ).catch((err) => {
-                console.error("Erreur lors de la démarrage du scanner : ", err);
+            ).catch(err => {
+                console.error("Erreur lors du démarrage du scanner : ", err);
+                alert("Erreur : " + err.message);
             });
         }
 
-        function redirectToInvite(decodedText) {
-            // Logique pour rediriger l'utilisateur vers les détails de l'invité
-            // Par exemple, si le code contient un ID d'invité
-            window.location.href = `/Invites/Details/${decodedText}`;
-        }
         function uploadQRCode(file) {
             if (!file) {
                 alert("Aucun fichier sélectionné !");
@@ -184,5 +304,5 @@
                     alert('Erreur lors du traitement du QR code.');
                 });
         }
-    </script>
+    </script> *@
 </div>
