@@ -4,136 +4,159 @@
 }
 
 <div class="container mt-5">
-    <h1>Index</h1>
+    <h1 class="text-center mb-4">Gestion des Invités</h1>
 
     <form asp-action="Index" class="mb-4">
-        <div class="form-group">
-            <label for="searchNomInvite">Nom Invite</label>
-            <input type="text" name="searchNomInvite" class="form-control" value="@ViewData["searchNomInvite"]" />
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="searchNomInvite">Nom Invite</label>
+                    <input type="text" name="searchNomInvite" class="form-control" value="@ViewData["searchNomInvite"]" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="searchPrenomInvite">Prénom Invite</label>
+                    <input type="text" name="searchPrenomInvite" class="form-control" value="@ViewData["searchPrenomInvite"]" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="searchNomTable">Nom de Table</label>
+                    <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="searchEstPresent">Présence</label>
+                    <select name="searchEstPresent" class="form-control">
+                        <option value="">Tous</option>
+                        <option value="true">Oui</option>
+                        <option value="false">Non</option>
+                    </select>
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="searchPrenomInvite">Prenom Invite</label>
-            <input type="text" name="searchPrenomInvite" class="form-control" value="@ViewData["searchPrenomInvite"]" />
-        </div>
-        <div class="form-group">
-            <label for="searchNomTable">Nom de Table</label>
-            <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
-        </div>
-        <div class="form-group">
-            <label for="searchEstPresent">Presence</label>
-            <select name="searchEstPresent" class="form-control">
-                <option value="">Tous</option>
-                <option value="true">Oui</option>
-                <option value="false">Non</option>
-            </select>
-        </div>
+       <button type="submit" class="btn btn-primary mt-3">
+        Rechercher <i class="fa fa-search"></i>
+    </button>
 
-        <input type="submit" value="Search" class="btn btn-primary" />
     </form>
 
-    <p>
-        <a asp-action="Create" class="btn btn-success">Create New</a>
-    </p>
+    <div classs="row">
+        <div class="col-12 ">
+            <p class="text-center">
+                <a asp-action="Create" class="btn btn-success">Créer un Nouvel Invité</a>
+            </p>
+        </div>
+    
 
-    <!-- Ajout des boutons pour scanner ou téléverser un QR code -->
-    <div class="mb-3">
+        <!-- Section QR Code -->
+        <div class="mb-3 text-center">
+            <h3 class="col-md-6">Scanner ou Téléverser un QR Code</h3>
+            <div id="qrReader" class="mb-2 col-md-3"></div>
+            <div class="col-md-6">
+                <button class="btn btn-success" onclick="scanQRCode()">Scanner QR Code</button>
+                <button class="btn btn-info" onclick="document.getElementById('uploadQRCode').click();">Téléverser QR Code</button>
+                <input type="file" id="uploadQRCode" style="display:none;" accept="image/*" onchange="uploadQRCode(this.files[0])">
+            </div>
+            
+        </div>
 
-        <div id="qrReader"></div>
-
-        <button class="btn btn-success" onclick="scanQRCode()">Scanner QR Code</button>
-        <button class="btn btn-info" onclick="document.getElementById('uploadQRCode').click();">Téléverser QR Code</button>
-        <input type="file" id="uploadQRCode" style="display:none;" accept="image/*" onchange="uploadQRCode(this.files[0])">
+        <div class="">
+            <p class="text-center">
+                <a asp-action="Create" class="btn btn-success">Créer un Nouvel Invité</a>
+            </p>
+        </div>
     </div>
-
-    <!-- Zone de résultat du scan -->
-    <p id="qrResult">Résultat du QR Code : <span id="qrCodeResult"></span></p>
+    
 
     <!-- Table des données -->
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th> Confirmer  Presence</th>
-                <th>
-                    @Html.ActionLink("ID", "Index", new { sortOrder = ViewBag.IdSortParm })
-                    <span class="@(ViewBag.IdSortParm == "id_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th>
-                    @Html.ActionLink("Nom Invite", "Index", new { sortOrder = ViewBag.NomInviteSortParm })
-                    <span class="@(ViewBag.NomInviteSortParm == "nominvite_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th>
-                    @Html.ActionLink("Prenom Invite", "Index", new { sortOrder = ViewBag.PrenomInviteSortParm })
-                    <span class="@(ViewBag.PrenomInviteSortParm == "prenominvite_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th>
-                    @Html.ActionLink("Invités de", "Index", new { sortOrder = ViewBag.InviteurPrenomSortParm })
-                    <span class="@(ViewBag.InviteurPrenomSortParm == "inviteurprenom_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th>
-                    @Html.ActionLink("Nom de Table (Places Total/Places Dispo)", "Index", new { sortOrder = ViewBag.NomTableSortParm })
-                    <span class="@(ViewBag.NomTableSortParm == "nomtable_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th>
-                    @Html.ActionLink("Type Billets", "Index", new { sortOrder = ViewBag.TypeBilletsSortParm })
-                    <span class="@(ViewBag.TypeBilletsSortParm == "typebillets_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th>
-                    @Html.ActionLink("EstPresent", "Index", new { sortOrder = ViewBag.EstPresentSortParm })
-                    <span class="@(ViewBag.EstPresentSortParm == "EstPresent_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
-                </th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered mt-4">
+            <thead class="thead-dark">
                 <tr>
-                   <td>
-                        <a asp-action="ConfirmerPresenceJour" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Confirmer presence">
-                            <i class="fa fa-check"></i>
-                        </a>
-                   </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Id)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.NomInvite)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.PrenomInvite)
-                    </td>
-                    <td>
-                        @(item.Inviteur?.PrenomInvite ?? "")
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.Table.NomTable)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TypeBillets)
-                    </td>
-                    <td>
-                        @(item.EstPresent ? "Oui" : "Non")
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Editer">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Détails">
-                            <i class="fas fa-info-circle"></i>
-                        </a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Supprimer">
-                            <i class="fas fa-trash-alt"></i>
-                        </a>
-                        <a asp-action="GenerateQRCode" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Générer QR Code">
-                            <i class="fas fa-qrcode"></i>
-                        </a>
-                        
-                    </td>
-
+                    <th>Présent</th>
+                    <th>
+                        @Html.ActionLink("ID", "Index", new { sortOrder = ViewBag.IdSortParm })
+                        <span class="@(ViewBag.IdSortParm == "id_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Nom Invite", "Index", new { sortOrder = ViewBag.NomInviteSortParm })
+                        <span class="@(ViewBag.NomInviteSortParm == "nominvite_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Prénom Invite", "Index", new { sortOrder = ViewBag.PrenomInviteSortParm })
+                        <span class="@(ViewBag.PrenomInviteSortParm == "prenominvite_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Invités de", "Index", new { sortOrder = ViewBag.InviteurPrenomSortParm })
+                        <span class="@(ViewBag.InviteurPrenomSortParm == "inviteurprenom_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Nom de Table", "Index", new { sortOrder = ViewBag.NomTableSortParm })
+                        <span class="@(ViewBag.NomTableSortParm == "nomtable_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Type Billets", "Index", new { sortOrder = ViewBag.TypeBilletsSortParm })
+                        <span class="@(ViewBag.TypeBilletsSortParm == "typebillets_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th>
+                        @Html.ActionLink("Est Présent", "Index", new { sortOrder = ViewBag.EstPresentSortParm })
+                        <span class="@(ViewBag.EstPresentSortParm == "EstPresent_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                    </th>
+                    <th> Actions </th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <button asp-action="ConfirmerPresenceJour" asp-route-id="@item.Id" class="btn btn-success btn-sm" title="Confirmer présence">
+                                Present
+                            </button>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NomInvite)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.PrenomInvite)
+                        </td>
+                        <td>
+                            @(item.Inviteur?.PrenomInvite ?? "")
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Table.NomTable)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TypeBillets)
+                        </td>
+                        <td>
+                            @(item.EstPresent ? "Oui" : "Non")
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Éditer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm" title="Détails">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" title="Supprimer">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            <a asp-action="GenerateQRCode" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Générer QR Code">
+                                <i class="fas fa-qrcode"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
     <style>
         /* Style pour le conteneur */
@@ -144,11 +167,9 @@
             border: 1px solid #ccc; /* Bordure pour le conteneur */
             overflow: hidden; /* Assurez-vous que le contenu ne dépasse pas */
         }
-
     </style>
 
     <!-- JavaScript pour scanner et téléverser un QR code -->
-
     <script>
         function scanQRCode() {
             const html5QrCode = new Html5Qrcode("qrReader");
@@ -177,65 +198,42 @@
                             if (result.success) {
                                 window.location.href = '/Invites/Details/' + result.inviteId;
                             } else {
-                                alert("Erreur: " + result.message);
+                                alert(result.message);
                             }
                         })
-                        .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur lors du traitement du QR code.');
-                        })
-                        .finally(() => {
-                            html5QrCode.stop().then(() => {
-                                console.log("Scanner arrêté.");
-                            }).catch(err => {
-                                console.error("Erreur lors de l'arrêt du scanner : ", err);
-                            });
-                        });
+                        .catch(error => console.error("Erreur :", error));
                 },
                 (errorMessage) => {
-                    console.warn("QR code non reconnu : ", errorMessage);
+                    console.warn(`QR Code non décodé : ${errorMessage}`);
                 }
             ).catch(err => {
-                console.error("Erreur lors du démarrage du scanner : ", err);
-                alert("Erreur : " + err.message);
+                console.error("Erreur lors du démarrage de la caméra : ", err);
             });
         }
 
         function uploadQRCode(file) {
-            if (!file) {
-                alert("Aucun fichier sélectionné !");
-                return;
-            }
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const imageData = event.target.result;
 
-            // Vérifier le type de fichier (optionnel)
-            if (!file.type.startsWith('image/')) {
-                alert("Veuillez téléverser une image !");
-                return;
-            }
-
-            // Préparer le formulaire de données
-            let formData = new FormData();
-            formData.append('qrCodeImage', file);
-
-            // Envoyer l'image au serveur via AJAX
-            fetch('/Invites/ReadQRCodeTeleverse', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())  // On attend une réponse JSON
-                .then(result => {
-                    if (result.success) {
-                        // Si le serveur renvoie "success: true", on redirige vers la page des détails
-                        window.location.href = '/Invites/Details/' + result.inviteId;
-                    } else {
-                        // Si le serveur renvoie "success: false", on affiche un message d'erreur
-                        alert("Erreur: " + result.message);
+                fetch('/Invites/ReadQRCode', {
+                    method: 'POST',
+                    body: JSON.stringify({ imageData: imageData }),
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
                 })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    alert('Erreur lors du traitement du QR code.');
-                });
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            window.location.href = '/Invites/Details/' + result.inviteId;
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .catch(error => console.error("Erreur :", error));
+            };
+            reader.readAsDataURL(file);
         }
     </script>
 </div>

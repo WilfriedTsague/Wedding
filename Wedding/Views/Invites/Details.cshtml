@@ -34,6 +34,9 @@
         <a href="@Url.Action("Index")" class="btn btn-secondary mx-2" title="Retour à la liste">
             <i class="fas fa-arrow-left"></i>
         </a>
+        <a asp-action="ConfirmerPresenceJour" asp-route-id="@Model.Id" class="btn btn-success btn-sm" title="Confirmer présence">
+            <i class="fa fa-check"> Confirmer la Presence </i>
+        </a>
     </div>
 </div>
 

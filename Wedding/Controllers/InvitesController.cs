@@ -212,7 +212,7 @@ namespace Wedding.Controllers
         // POST: InvitesController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("NomInvite", "PrenomInvite", "IdTable", "IdInviteur", "TypeBillets")] Invite invite)
+        public async Task<IActionResult> Edit(int id, [Bind("NomInvite", "PrenomInvite", "IdTable", "IdInviteur", "TypeBillets","EstPresent")] Invite invite)
         {
             if (ModelState.IsValid)
             {
@@ -269,6 +269,7 @@ namespace Wedding.Controllers
                     inviteToUpdate.IdTable = invite.IdTable;
                     inviteToUpdate.IdInviteur = invite.IdInviteur;
                     inviteToUpdate.TypeBillets = invite.TypeBillets;
+                    inviteToUpdate.EstPresent = invite.EstPresent;
                     _context.Update(inviteToUpdate);
                     await _context.SaveChangesAsync();
                 }
