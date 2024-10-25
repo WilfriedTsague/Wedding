@@ -11,12 +11,12 @@ builder.Services.AddControllersWithViews();
 //builder.Services.AddDbContext<WeddingContext>(options =>
 //options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnexion")));
 
-builder.Services.AddDbContext<WeddingContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 //builder.Services.AddDbContext<WeddingContext>(options =>
-//           options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-//           new MySqlServerVersion(new Version(8, 0, 23))));
+//options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<WeddingContext>(options =>
+           options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+           new MySqlServerVersion(new Version(8, 0, 23))));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

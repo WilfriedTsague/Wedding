@@ -27,7 +27,7 @@ namespace Wedding.Controllers
             _context = context;
         }
         // GET: Invites
-        public async Task<IActionResult> Index(string sortOrder, string searchNomInvite, string searchPrenomInvite, string searchNomTable)
+        public async Task<IActionResult> Index(string sortOrder, string searchNomInvite, string searchPrenomInvite, string searchNomTable, string searchEstPresent)
         {
             ViewBag.IdSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
             ViewBag.NomInviteSortParm = sortOrder == "NomInvite" ? "nominvite_desc" : "NomInvite";
@@ -35,6 +35,7 @@ namespace Wedding.Controllers
             ViewBag.InviteurPrenomSortParm = sortOrder == "InviteurPrenom" ? "inviteurprenom_desc" : "InviteurPrenom";
             ViewBag.NomTableSortParm = sortOrder == "NomTable" ? "nomtable_desc" : "NomTable";
             ViewBag.TypeBilletsSortParm = sortOrder == "TypeBillets" ? "typebillets_desc" : "TypeBillets";
+            ViewBag.EstPresentSortParm = sortOrder == "EstPresent" ? "EstPresent_desc" : "EstPresent";
 
             var invites = from i in _context.Invites.Include(i => i.Inviteur).Include(i => i.Table)
                           select i;
@@ -53,6 +54,21 @@ namespace Wedding.Controllers
             {
                 invites = invites.Where(i => i.Table.NomTable.Contains(searchNomTable));
             }
+
+            // Filtrer par nom de table si un nom est fourni
+            if (!string.IsNullOrEmpty(searchEstPresent) && searchEstPresent.ToLower() == "true")
+            {
+                invites = invites.Where(i => i.EstPresent == true);
+            }
+
+            // Filtrer par nom de table si un nom est fourni
+            if (!string.IsNullOrEmpty(searchEstPresent) && searchEstPresent.ToLower() == "false")
+            {
+                invites = invites.Where(i => i.EstPresent == false);
+            }
+
+
+
 
             switch (sortOrder)
             {
@@ -89,6 +105,12 @@ namespace Wedding.Controllers
                 case "typebillets_desc":
                     invites = invites.OrderByDescending(i => i.TypeBillets);
                     break;
+                case "EstPresent":
+                    invites = invites.OrderBy(i => i.EstPresent);
+                    break;
+                case "EstPresent_desc":
+                    invites = invites.OrderByDescending(i => i.EstPresent);
+                    break;
                 default:
                     invites = invites.OrderBy(i => i.Id);
                     break;
@@ -97,6 +119,7 @@ namespace Wedding.Controllers
             ViewData["searchNomInvite"] = searchNomInvite;
             ViewData["searchPrenomInvite"] = searchPrenomInvite;
             ViewData["searchNomTable"] = searchNomTable;
+            ViewData["searchEstPresent"] = searchEstPresent;
 
             return View(await invites.ToListAsync());
         }
@@ -318,6 +341,64 @@ namespace Wedding.Controllers
         }
 
 
+
+        public async Task<IActionResult> ConfirmerPresenceJour(int id)
+        {
+            // Récupérer l'invité avec sa table associée
+            var invite = await _context.Invites.Include(i => i.Table).FirstOrDefaultAsync(i => i.Id == id);
+
+            if (invite == null)
+            {
+                return NotFound();
+            }
+
+            // Vérifier si l'invité est déjà marqué comme présent
+            if (invite.EstPresent)
+            {
+
+                return BadRequest("L'invité a déjà été enregistré comme présent.");
+            }
+
+            var table = invite.Table;
+
+            // Si la table n'a pas de nombre d'invités présents initialisé, on le met à 0
+            if (table.NbreInvitePresent == null)
+            {
+                table.NbreInvitePresent = 0;
+            }
+
+            // Ajouter le nombre d'invités présents en fonction du type de billet
+            if (invite.TypeBillets.ToLower() == "solo")
+            {
+                table.NbreInvitePresent += 1; // Billet solo, on ajoute 1
+            }
+            else if (invite.TypeBillets.ToLower() == "couple")
+            {
+                table.NbreInvitePresent += 2; // Billet couple, on ajoute 2
+            }
+
+            // Marquer l'invité comme présent
+            invite.EstPresent = true;
+
+            // Mettre à jour le statut de la table en fonction du nombre de présents
+            if (table.NbreInvitePresent > 0 && table.NbreInvitePresent < table.NbrePlaces)
+            {
+                table.StatutDuJour = Statut.En_cours; // La table a commencé à se remplir
+            }
+            else if (table.NbreInvitePresent >= table.NbrePlaces)
+            {
+                table.StatutDuJour = Statut.Pleine; // La table est pleine
+            }
+
+            // Sauvegarder les changements dans la base de données
+            _context.Tables.Update(table);
+            _context.Invites.Update(invite);
+            await _context.SaveChangesAsync();
+
+            // Rediriger vers la page Index
+            return RedirectToAction(nameof(Index));
+        }
+
         public IActionResult GenerateQRCode(int id)
         {
             var invite = _context.Invites.Include(i => i.Table).FirstOrDefault(i => i.Id == id);
@@ -364,7 +445,7 @@ namespace Wedding.Controllers
 
 
         [HttpPost]
-        public IActionResult ReadQRCode(IFormFile qrCodeImage)
+        public IActionResult ReadQRCodeTeleverse(IFormFile qrCodeImage)
         {
             try
             {
@@ -432,6 +513,50 @@ namespace Wedding.Controllers
                 return Json(new { success = false, message = $"Erreur lors du traitement du QR code : {ex.Message}" });
 
             }
+        }
+
+
+        [HttpPost]
+        public IActionResult ReadQRCode([FromBody] QRCodeDataModel qrCodeData)
+        {
+            try
+            {
+                if (qrCodeData == null || string.IsNullOrEmpty(qrCodeData.QRCodeData))
+                {
+                    return Json(new { success = false, message = "Aucune image de QR code reçue." });
+                }
+
+                string decodedText = qrCodeData.QRCodeData;
+                var parts = decodedText.Split(';');
+                var idPart = parts.FirstOrDefault(p => p.StartsWith("IdInvite:"));
+
+                if (parts.Length == 0 || idPart == null || !idPart.StartsWith("IdInvite:"))
+                {
+                    return Json(new { success = false, message = "Le format du QR code est incorrect." });
+                }
+
+                if (int.TryParse(idPart.Replace("IdInvite:", ""), out int inviteId))
+                {
+                    var invite = _context.Invites.FirstOrDefault(i => i.Id == inviteId);
+                    if (invite != null)
+                    {
+                        return Json(new { success = true, inviteId = invite.Id });
+                    }
+                }
+
+                return Json(new { success = false, message = "Invité non trouvé." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Json(new { success = false, message = $"Erreur lors du traitement du QR code : {ex.Message}" });
+            }
+        }
+
+
+        public class QRCodeDataModel
+        {
+            public string QRCodeData { get; set; }
         }
 
 

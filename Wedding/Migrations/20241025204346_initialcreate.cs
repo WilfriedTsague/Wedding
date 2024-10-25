@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -10,13 +11,17 @@ namespace Wedding.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateTable(
                 name: "Table",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NomTable = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    NomTable = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     NbrePlaces = table.Column<int>(type: "int", nullable: false),
                     Statut = table.Column<int>(type: "int", nullable: false),
                     NbreInvitePresent = table.Column<int>(type: "int", nullable: true),
@@ -26,20 +31,26 @@ namespace Wedding.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Table", x => x.Id);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "Invite",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NomInvite = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PrenomInvite = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    NomInvite = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    PrenomInvite = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     IdInviteur = table.Column<int>(type: "int", nullable: true),
                     IdTable = table.Column<int>(type: "int", nullable: false),
-                    TypeBillets = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    QRCodeId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    EstPresent = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TypeBillets = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    QRCodeId = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -56,7 +67,8 @@ namespace Wedding.Migrations
                         principalTable: "Table",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Invite_IdInviteur",

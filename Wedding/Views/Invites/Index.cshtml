@@ -7,7 +7,6 @@
     <h1>Index</h1>
 
     <form asp-action="Index" class="mb-4">
-        <span class="fa fa-check"></span>
         <div class="form-group">
             <label for="searchNomInvite">Nom Invite</label>
             <input type="text" name="searchNomInvite" class="form-control" value="@ViewData["searchNomInvite"]" />
@@ -20,6 +19,15 @@
             <label for="searchNomTable">Nom de Table</label>
             <input type="text" name="searchNomTable" class="form-control" value="@ViewData["searchNomTable"]" />
         </div>
+        <div class="form-group">
+            <label for="searchEstPresent">Presence</label>
+            <select name="searchEstPresent" class="form-control">
+                <option value="">Tous</option>
+                <option value="true">Oui</option>
+                <option value="false">Non</option>
+            </select>
+        </div>
+
         <input type="submit" value="Search" class="btn btn-primary" />
     </form>
 
@@ -44,6 +52,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th> Confirmer  Presence</th>
                 <th>
                     @Html.ActionLink("ID", "Index", new { sortOrder = ViewBag.IdSortParm })
                     <span class="@(ViewBag.IdSortParm == "id_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
@@ -68,6 +77,10 @@
                     @Html.ActionLink("Type Billets", "Index", new { sortOrder = ViewBag.TypeBilletsSortParm })
                     <span class="@(ViewBag.TypeBilletsSortParm == "typebillets_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
                 </th>
+                <th>
+                    @Html.ActionLink("EstPresent", "Index", new { sortOrder = ViewBag.EstPresentSortParm })
+                    <span class="@(ViewBag.EstPresentSortParm == "EstPresent_desc" ? "fa fa-sort-desc" : "fa fa-sort-asc")"></span>
+                </th>
                 <th></th>
             </tr>
         </thead>
@@ -75,6 +88,11 @@
             @foreach (var item in Model)
             {
                 <tr>
+                   <td>
+                        <a asp-action="ConfirmerPresenceJour" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Confirmer presence">
+                            <i class="fa fa-check"></i>
+                        </a>
+                   </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Id)
                     </td>
@@ -94,6 +112,9 @@
                         @Html.DisplayFor(modelItem => item.TypeBillets)
                     </td>
                     <td>
+                        @(item.EstPresent ? "Oui" : "Non")
+                    </td>
+                    <td>
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Editer">
                             <i class="fas fa-edit"></i>
                         </a>
@@ -106,6 +127,7 @@
                         <a asp-action="GenerateQRCode" asp-route-id="@item.Id" class="btn btn-secondary btn-sm" title="Générer QR Code">
                             <i class="fas fa-qrcode"></i>
                         </a>
+                        
                     </td>
 
                 </tr>
@@ -145,7 +167,10 @@
 
                     fetch('/Invites/ReadQRCode', {
                         method: 'POST',
-                        body: formData
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ qrCodeData: decodedText })
                     })
                         .then(response => response.json())
                         .then(result => {
@@ -182,98 +207,6 @@
                 return;
             }
 
-            if (!file.type.startsWith('image/')) {
-                alert("Veuillez téléverser une image !");
-                return;
-            }
-
-            let formData = new FormData();
-            formData.append('qrCodeImage', file);
-
-            fetch('/Invites/ReadQRCode', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        window.location.href = '/Invites/Details/' + result.inviteId;
-                    } else {
-                        alert("Erreur: " + result.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                    alert('Erreur lors du traitement du QR code.');
-                });
-        }
-    </script>
-
-   @*  <script>
-        function scanQRCode() {
-            // Initialiser le lecteur de QR code
-            const html5QrCode = new Html5Qrcode("qrReader");
-
-            // Démarrer le scanner de QR code avec la caméra
-            html5QrCode.start(
-                { facingMode: "environment" }, // Utilise la caméra arrière
-                {
-                    fps: 10,    // Fréquence d'images
-                    qrbox: { width: 250, height: 250 } // Utilisez un objet pour définir la taille
-
-                },
-                (decodedText, decodedResult) => {
-                    // Appelé lorsque le code QR est décodé
-                    console.log("QR Code décodé : ", decodedText);
-
-                    // Préparer le formulaire de données
-                    let formData = new FormData();
-                    formData.append('qrCodeData', decodedText); // Ajoute le texte décodé au formulaire
-
-                    // Envoyer le QR code décodé au serveur via AJAX
-                    fetch('/Invites/ReadQRCode', {
-                        method: 'POST',
-                        body: formData
-                    })
-                        .then(response => response.json())  // On attend une réponse JSON
-                        .then(result => {
-                            if (result.success) {
-                                // Si le serveur renvoie "success: true", on redirige vers la page des détails
-                                window.location.href = '/Invites/Details/' + result.inviteId;
-                            } else {
-                                // Si le serveur renvoie "success: false", on affiche un message d'erreur
-                                alert("Erreur: " + result.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Erreur:', error);
-                            alert('Erreur lors du traitement du QR code.');
-                        })
-                        .finally(() => {
-                            // Arrêter le scanner après avoir traité le QR code
-                            html5QrCode.stop().then(() => {
-                                console.log("Scanner arrêté.");
-                            }).catch(err => {
-                                console.error("Erreur lors de l'arrêt du scanner : ", err);
-                            });
-                        });
-                },
-                (errorMessage) => {
-                    // Gère les erreurs de décodage
-                    console.warn("QR code non reconnu : ", errorMessage);
-                }
-            ).catch(err => {
-                console.error("Erreur lors du démarrage du scanner : ", err);
-                alert("Erreur : " + err.message);
-            });
-        }
-
-        function uploadQRCode(file) {
-            if (!file) {
-                alert("Aucun fichier sélectionné !");
-                return;
-            }
-
             // Vérifier le type de fichier (optionnel)
             if (!file.type.startsWith('image/')) {
                 alert("Veuillez téléverser une image !");
@@ -285,7 +218,7 @@
             formData.append('qrCodeImage', file);
 
             // Envoyer l'image au serveur via AJAX
-            fetch('/Invites/ReadQRCode', {
+            fetch('/Invites/ReadQRCodeTeleverse', {
                 method: 'POST',
                 body: formData
             })
@@ -304,5 +237,5 @@
                     alert('Erreur lors du traitement du QR code.');
                 });
         }
-    </script> *@
+    </script>
 </div>

@@ -11,6 +11,7 @@ namespace Wedding.Models
         public int? IdInviteur { get; set; }
         public Invite? Inviteur { get; set; }
         public int IdTable { get; set; }
+        public bool EstPresent { get; set; } = false;
         public virtual Table? Table { get; set; }
 
 
