@@ -1,62 +1,20 @@
-﻿@model Wedding.Models.Table
+﻿@model Wedding.Models.Invite
 
-@{
-    ViewData["Title"] = "Delete";
-}
+<h2>Supprimer l'invité</h2>
 
-<h1>Delete</h1>
-
-<h3>Are you sure you want to delete this?</h3>
 <div>
-    <h4>Table</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Id)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NomTable)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NomTable)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NbrePlaces)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NbrePlaces)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Statut)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Statut)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NbreInvitePresent)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NbreInvitePresent)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NombreInvites)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.NombreInvites)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StatutDuJour)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StatutDuJour)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+    <h4>Voulez-vous vraiment supprimer cet invité ?</h4>
+    <div>
+        <strong>Nom :</strong> @Model.NomInvite
+        <br />
+        <strong>Prénom :</strong> @Model.PrenomInvite
+        <br />
+        <strong>Table :</strong> @Model.Table.NomTable
+    </div>
+
+    <form asp-action="DeleteConfirmed" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Supprimer</button>
+        <a asp-action="Index" class="btn btn-secondary">Annuler</a>
     </form>
 </div>

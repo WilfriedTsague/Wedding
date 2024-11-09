@@ -1,4 +1,6 @@
-﻿@model IEnumerable<Wedding.Models.Invite>
+﻿@using X.PagedList.Mvc.Core
+@using X.PagedList
+@model IPagedList<Wedding.Models.Invite>
 @{
     ViewData["Title"] = "Index";
 }
@@ -157,6 +159,19 @@
             </tbody>
         </table>
     </div>
+    <!-- Pagination -->
+    <div class="text-center">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new
+            {
+                page,
+                sortOrder = ViewBag.CurrentSort,
+                searchNomInvite = ViewBag.searchNomInvite,
+                searchPrenomInvite = ViewBag.searchPrenomInvite,
+                searchNomTable = ViewBag.searchNomTable,
+                searchEstPresent = ViewBag.searchEstPresent
+            }))
+    </div>
+
 
     <style>
         /* Style pour le conteneur */

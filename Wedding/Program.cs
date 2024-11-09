@@ -12,11 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+
 //builder.Services.AddDbContext<WeddingContext>(options =>
 //options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnexion")));
 
 //builder.Services.AddDbContext<WeddingContext>(options =>
-//options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnections")));
 
 builder.Services.AddDbContext<WeddingContext>(options =>
            options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),

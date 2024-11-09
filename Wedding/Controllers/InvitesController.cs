@@ -4,14 +4,17 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Drawing;
-using System.Drawing.Text;
 using Wedding.ContexteDB;
 using Wedding.Models;
 using QRCoder;
 using System.Drawing.Imaging;
 using System.IO;
 using ZXing;
-using System.Drawing; // Assurez-vous d'avoir ajouté System.Drawing.Common via NuGet
+using System.Drawing;
+using X.PagedList;
+using X.PagedList.EF;
+
+
 
 
 
@@ -27,7 +30,7 @@ namespace Wedding.Controllers
             _context = context;
         }
         // GET: Invites
-        public async Task<IActionResult> Index(string sortOrder, string searchNomInvite, string searchPrenomInvite, string searchNomTable, string searchEstPresent)
+        public async Task<IActionResult> Index(string sortOrder, string searchNomInvite, string searchPrenomInvite, string searchNomTable, string searchEstPresent, int? page, int pageSize = 10)
         {
             ViewBag.IdSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
             ViewBag.NomInviteSortParm = sortOrder == "NomInvite" ? "nominvite_desc" : "NomInvite";
@@ -37,8 +40,7 @@ namespace Wedding.Controllers
             ViewBag.TypeBilletsSortParm = sortOrder == "TypeBillets" ? "typebillets_desc" : "TypeBillets";
             ViewBag.EstPresentSortParm = sortOrder == "EstPresent" ? "EstPresent_desc" : "EstPresent";
 
-            var invites = from i in _context.Invites.Include(i => i.Inviteur).Include(i => i.Table)
-                          select i;
+            var invites = _context.Invites.Include(i => i.Inviteur).Include(i => i.Table).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchNomInvite))
             {
@@ -55,20 +57,11 @@ namespace Wedding.Controllers
                 invites = invites.Where(i => i.Table.NomTable.Contains(searchNomTable));
             }
 
-            // Filtrer par nom de table si un nom est fourni
-            if (!string.IsNullOrEmpty(searchEstPresent) && searchEstPresent.ToLower() == "true")
+            if (!string.IsNullOrEmpty(searchEstPresent))
             {
-                invites = invites.Where(i => i.EstPresent == true);
+                bool isPresent = searchEstPresent.ToLower() == "true";
+                invites = invites.Where(i => i.EstPresent == isPresent);
             }
-
-            // Filtrer par nom de table si un nom est fourni
-            if (!string.IsNullOrEmpty(searchEstPresent) && searchEstPresent.ToLower() == "false")
-            {
-                invites = invites.Where(i => i.EstPresent == false);
-            }
-
-
-
 
             switch (sortOrder)
             {
@@ -84,45 +77,13 @@ namespace Wedding.Controllers
                 case "PrenomInvite":
                     invites = invites.OrderBy(i => i.PrenomInvite);
                     break;
-                case "prenominvite_desc":
-                    invites = invites.OrderByDescending(i => i.PrenomInvite);
-                    break;
-                case "InviteurPrenom":
-                    invites = invites.OrderBy(i => i.Inviteur.PrenomInvite);
-                    break;
-                case "inviteurprenom_desc":
-                    invites = invites.OrderByDescending(i => i.Inviteur.PrenomInvite);
-                    break;
-                case "NomTable":
-                    invites = invites.OrderBy(i => i.Table.NomTable);
-                    break;
-                case "nomtable_desc":
-                    invites = invites.OrderByDescending(i => i.Table.NomTable);
-                    break;
-                case "TypeBillets":
-                    invites = invites.OrderBy(i => i.TypeBillets);
-                    break;
-                case "typebillets_desc":
-                    invites = invites.OrderByDescending(i => i.TypeBillets);
-                    break;
-                case "EstPresent":
-                    invites = invites.OrderBy(i => i.EstPresent);
-                    break;
-                case "EstPresent_desc":
-                    invites = invites.OrderByDescending(i => i.EstPresent);
-                    break;
-                default:
-                    invites = invites.OrderBy(i => i.Id);
-                    break;
+                    // Ajoutez d'autres cas selon vos besoins de tri.
             }
 
-            ViewData["searchNomInvite"] = searchNomInvite;
-            ViewData["searchPrenomInvite"] = searchPrenomInvite;
-            ViewData["searchNomTable"] = searchNomTable;
-            ViewData["searchEstPresent"] = searchEstPresent;
-
-            return View(await invites.ToListAsync());
+            int pageNumber = page ?? 1;
+            return View(await invites.ToPagedListAsync(pageNumber, pageSize));
         }
+
 
 
         // GET: Invites/Details/5
@@ -203,7 +164,7 @@ namespace Wedding.Controllers
             var invite = await _context.Invites.FindAsync(id);
             if(invite == null)
             {  return NotFound(); }
-            ViewData["IdTable"] = new SelectList(_context.Tables.Where(t => t.Statut != Statut.Pleine), "Id", "NomTable");
+            ViewData["IdTable"] = new SelectList(_context.Tables, "Id", "NomTable");
             ViewData["IdInviteur"] = new SelectList(_context.Invites, "Id", "NomInvite");
 
             return View(invite);
@@ -311,13 +272,38 @@ namespace Wedding.Controllers
         // POST: InvitesController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id )
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-          var invite = await _context.Invites.FindAsync(id);
+            var invite = await _context.Invites.Include(i => i.Table).FirstOrDefaultAsync(i => i.Id == id);
+
+            if (invite == null)
+            {
+                return NotFound();
+            }
+
+            var table = invite.Table;
+
+            // Déterminer le nombre de places à libérer en fonction du type de billet
+            int placesToFree = invite.TypeBillets.ToLower() == "couple" ? 2 : 1;
+
+            // Décrémenter le nombre d'invités sur la table
+            table.NombreInvites -= placesToFree;
+
+            // Mettre à jour le statut de la table
+            if (table.NombreInvites < table.NbrePlaces)
+            {
+                table.Statut = table.NombreInvites > 0 ? Statut.En_cours : Statut.Vide;
+            }
+
+            // Supprimer l'invité de la base de données
             _context.Invites.Remove(invite);
+
+            // Sauvegarder les modifications
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         public async Task<IActionResult> ConfirmerPresence(int inviteId)
